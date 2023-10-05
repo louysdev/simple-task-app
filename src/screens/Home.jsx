@@ -1,5 +1,12 @@
-import React, { useState } from "react";
-import { FlatList, Modal, Pressable, StyleSheet, Text } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  StyleSheet,
+  Text,
+} from "react-native";
 import FormularioTarea from "../components/FormularioTarea";
 import CartaTarea from "../components/CartaTarea";
 import DetalleTarea from "../components/DetalleTarea";
@@ -7,6 +14,8 @@ import { useFonts } from "expo-font";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useTareas } from "../hooks/useTareas";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SplashScreen from "expo-splash-screen";
 
 function Home() {
   const [fontsLoaded, fontError] = useFonts({
@@ -25,6 +34,38 @@ function Home() {
   } = useTareas();
 
   const navigation = useNavigation();
+
+  const onLayoutRootView = useCallback(async () => {
+    if (fontsLoaded || fontError) {
+      await SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
+
+  useEffect(() => {
+    const obtenerTareas = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("tareas");
+        jsonValue != null ? setTareas(JSON.parse(jsonValue)) : null;
+      } catch (error) {
+        Alert.alert("Error al obtener las tareas", error.message);
+      }
+    };
+
+    obtenerTareas();
+  }, []);
+
+  useEffect(() => {
+    const guardarTareas = async () => {
+      try {
+        const jsonValue = JSON.stringify(tareas);
+        await AsyncStorage.setItem("tareas", jsonValue);
+      } catch (error) {
+        Alert.alert("Error al guardar las tareas", error.message);
+      }
+    };
+
+    guardarTareas();
+  }, [tareas]);
 
   if (!fontsLoaded && !fontError) {
     return null;
