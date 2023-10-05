@@ -6,35 +6,25 @@ import DetalleTarea from "../components/DetalleTarea";
 import { useFonts } from "expo-font";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import { useTareas } from "../hooks/useTareas";
 
 function Home() {
   const [fontsLoaded, fontError] = useFonts({
     PoppinsRegular: require("../../assets/fonts/Poppins-Regular.ttf"),
     PoppinsBold: require("../../assets/fonts/Poppins-Bold.ttf"),
   });
-  const [modalTareaVisible, setModalTareaVisible] = useState(false);
-  const [modalDetalleVisible, setModalDetalleVisible] = useState(false);
-  const [tareas, setTareas] = useState([]);
-  const [tarea, setTarea] = useState({
-    id: "",
-    titulo: "",
-    descripcion: "",
-    materia: "",
-    fecha: new Date(),
-  });
+
+  const {
+    handleDelete,
+    handleEdit,
+    setTarea,
+    tarea,
+    setTareas,
+    tareas,
+    limpiarFormulario,
+  } = useTareas();
 
   const navigation = useNavigation();
-
-  const handleDelete = (id) => {
-    const nuevaTareas = tareas.filter((tarea) => tarea.id !== id);
-    return setTareas(nuevaTareas);
-  };
-
-  const handleEdit = (id) => {
-    const tareaEditar = tareas.find((tarea) => tarea.id === id);
-    setTarea(tareaEditar);
-    setModalTareaVisible(!modalTareaVisible);
-  };
 
   if (!fontsLoaded && !fontError) {
     return null;
@@ -50,12 +40,15 @@ function Home() {
       {/* Boton para crear nueva tarea */}
       <Pressable
         style={styles.botonContenedor}
-        onPress={() => navigation.navigate("AgregarTarea")}
+        onPress={() => {
+          limpiarFormulario();
+          navigation.navigate("FormularioTarea");
+        }}
       >
         <Text style={styles.botonTexto}>Nueva tarea</Text>
       </Pressable>
 
-      {/* Modal para crear nueva tarea */}
+      {/* Modal para crear nueva tarea
       <Modal animationType="slide" visible={modalTareaVisible}>
         <FormularioTarea
           tarea={tarea}
@@ -71,7 +64,7 @@ function Home() {
           tarea={tarea}
           setModalDetalleVisible={setModalDetalleVisible}
         />
-      </Modal>
+      </Modal> */}
 
       {tareas.length <= 0 ? (
         <Text style={styles.textoNoTareas}>No hay tareas</Text>
@@ -86,8 +79,8 @@ function Home() {
               tarea={item}
               handleDelete={handleDelete}
               handleEdit={handleEdit}
-              setModalDetalleVisible={setModalDetalleVisible}
-              setTarea={setTarea}
+              irDetalle={() => navigation.navigate("DetalleTarea")}
+              irEditar={() => navigation.navigate("FormularioTarea")}
             />
           )}
         />

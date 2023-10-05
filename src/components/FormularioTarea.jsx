@@ -1,8 +1,9 @@
-import { useState } from "react";
-import BotonCerrarModal from "./BotonCerrarModal";
+import { useContext, useEffect } from "react";
 import CampoFormulario from "./CampoFormulario";
+import { TareasContext } from "../context/TareasContext";
+import { useNavigation } from "@react-navigation/native";
+import BotonCerrarModal from "./BotonCerrarModal";
 import TimePicker from "./TimePicker";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const {
   Text,
@@ -13,16 +14,18 @@ const {
   View,
 } = require("react-native");
 
-export default function FormularioTarea({
-  setModalTareaVisible,
-  tareas,
-  setTareas,
-  tarea,
-  setTarea,
-}) {
+export default function FormularioTarea() {
+  const { tarea, setTarea, tareas, setTareas } = useContext(TareasContext);
+  const navigation = useNavigation();
+
   const handleChange = (elemento, campo) => {
     console.log(tarea);
     setTarea({ ...tarea, [campo]: elemento });
+  };
+
+  const handleDate = (date) => {
+    console.log(date);
+    setTarea({ ...tarea, fecha: date });
   };
 
   const handleSumbit = () => {
@@ -55,7 +58,7 @@ export default function FormularioTarea({
     }
 
     limpiarFormulario();
-    setModalTareaVisible(false);
+    navigation.navigate("Home");
   };
 
   const limpiarFormulario = () => {
@@ -68,19 +71,31 @@ export default function FormularioTarea({
     });
   };
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => {
+        return (
+          <Text style={styles.titulo}>
+            {tarea.id !== "" ? "Editar" : "Nueva"}{" "}
+            <Text style={styles.tituloColor}>tarea</Text>
+          </Text>
+        );
+      },
+      headerStyle: {
+        backgroundColor: "#063852",
+      },
+      headerTitleAlign: "center",
+      headerTintColor: "#fff",
+      headerBackVisible: false,
+      headerRight: () => (
+        <BotonCerrarModal onPress={() => navigation.goBack()} />
+      ),
+    });
+  }, []);
+
   return (
     <View style={styles.contenedor}>
       <ScrollView>
-        <Text style={styles.titulo}>
-          {tarea.id !== "" ? "Editar" : "Nueva"}{" "}
-          <Text style={styles.tituloColor}>tarea</Text>
-        </Text>
-
-        {/* <BotonCerrarModal
-          setModalVisible={setModalTareaVisible}
-          limpiarFormulario={limpiarFormulario}
-        /> */}
-
         <CampoFormulario
           inputEtiqueta="Titulo de la tarea"
           inputPlaceholder="Realizar informe"
@@ -103,10 +118,7 @@ export default function FormularioTarea({
           onChangeText={(texto) => handleChange(texto, "materia")}
         />
 
-        <TimePicker
-          fecha={tarea.fecha}
-          onChangeDate={(fecha) => handleChange(fecha, "fecha")}
-        />
+        <TimePicker fechaTarea={tarea.fecha} handleDate={handleDate} />
 
         <Pressable style={styles.botonContenedor} onPress={handleSumbit}>
           <Text style={styles.botonTexto}>
@@ -125,10 +137,9 @@ const styles = StyleSheet.create({
   },
   titulo: {
     color: "#fff",
-    fontSize: 30,
+    fontSize: 28,
     fontFamily: "PoppinsRegular",
     textAlign: "center",
-    marginTop: 20,
   },
   tituloColor: {
     fontWeight: "700",

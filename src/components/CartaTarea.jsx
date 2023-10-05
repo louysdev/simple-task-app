@@ -1,17 +1,20 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { formatearFecha } from "../helpers";
+import { useTareas } from "../hooks/useTareas";
 
 export default function CartaTarea({
   tarea,
   handleDelete = () => {},
   handleEdit = () => {},
-  setModalDetalleVisible = () => {},
-  setTarea = () => {},
+  irDetalle = () => {},
+  irEditar = () => {},
 }) {
+  const { limpiarFormulario, setTarea } = useTareas();
+
   return (
     <Pressable
       onLongPress={() => {
-        setModalDetalleVisible(true);
+        irDetalle();
         setTarea(tarea);
       }}
     >
@@ -21,7 +24,11 @@ export default function CartaTarea({
         <Text style={styles.etiquetaFecha}>{formatearFecha(tarea.fecha)}</Text>
         <View style={styles.contenedorBotones}>
           <Pressable
-            onPress={() => handleEdit(tarea.id)}
+            onPress={() => {
+              limpiarFormulario();
+              handleEdit(tarea.id);
+              irEditar();
+            }}
             style={[styles.botonContenedor, styles.botonEditar]}
           >
             <Text style={styles.botonTexto}>Editar</Text>

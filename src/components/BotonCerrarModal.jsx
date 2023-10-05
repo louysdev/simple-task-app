@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet, Text } from "react-native";
 
 export default function BotonCerrarModal({
-  setModalVisible,
+  onPress = () => {},
   colorStyle = {},
   limpiarFormulario = () => {},
 }) {
@@ -10,7 +10,7 @@ export default function BotonCerrarModal({
       style={[styles.botonContenedor, colorStyle]}
       onPress={() => {
         limpiarFormulario();
-        setModalVisible(false);
+        onPress();
       }}
     >
       <Text style={styles.botonTexto}>Cerrar</Text>
@@ -22,13 +22,8 @@ const styles = StyleSheet.create({
   botonContenedor: {
     backgroundColor: "#095882",
     borderRadius: 10,
-    position: "absolute",
-    top: 0,
-    right: 0,
     paddingHorizontal: 10,
     paddingVertical: 2,
-    marginTop: 8,
-    marginHorizontal: 4,
   },
   botonTexto: {
     fontFamily: "PoppinsRegular",

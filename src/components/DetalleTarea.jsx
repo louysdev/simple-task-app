@@ -2,6 +2,9 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import BotonCerrarModal from "./BotonCerrarModal";
 import { formatearFecha } from "../helpers";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTareas } from "../hooks/useTareas";
+import { useNavigation } from "@react-navigation/native";
+import { useEffect } from "react";
 
 function TareaInfo({ titulo, detalle }) {
   return (
@@ -12,22 +15,33 @@ function TareaInfo({ titulo, detalle }) {
   );
 }
 
-export default function DetalleTarea({
-  tarea,
-  setModalDetalleVisible = () => {},
-}) {
-  return (
-    <SafeAreaView style={styles.contenedor}>
-      <ScrollView>
-        <Text style={styles.titulo}>
-          Información de <Text style={styles.tituloColor}>tarea</Text>
-        </Text>
+export default function DetalleTarea() {
+  const { tarea } = useTareas();
+  const navigation = useNavigation();
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => {
+        return <Text style={styles.titulo}>Información</Text>;
+      },
+      headerStyle: {
+        backgroundColor: "#F0810F",
+      },
+      headerTitleAlign: "center",
+      headerTintColor: "#fff",
+      headerBackVisible: false,
+      headerRight: () => (
         <BotonCerrarModal
-          setModalVisible={setModalDetalleVisible}
           colorStyle={{ backgroundColor: "#f39a3e" }}
+          onPress={() => navigation.goBack()}
         />
+      ),
+    });
+  }, []);
 
+  return (
+    <View style={styles.contenedor}>
+      <ScrollView>
         <View style={styles.contenedorCarta}>
           <TareaInfo titulo={"Titulo"} detalle={tarea.titulo} />
           <TareaInfo titulo={"Materia"} detalle={tarea.materia} />
@@ -35,7 +49,7 @@ export default function DetalleTarea({
           <TareaInfo titulo={"Descripción"} detalle={tarea.descripcion} />
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -49,15 +63,14 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontFamily: "PoppinsRegular",
     textAlign: "center",
-    marginTop: 40,
   },
   tituloColor: {
     fontWeight: "700",
   },
   contenedorCarta: {
+    marginTop: 20,
     backgroundColor: "#fff",
     marginHorizontal: 30,
-    marginTop: 30,
     marginBottom: 18,
     borderRadius: 10,
     padding: 20,
