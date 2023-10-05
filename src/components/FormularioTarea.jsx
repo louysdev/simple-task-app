@@ -10,6 +10,7 @@ const {
   ScrollView,
   Pressable,
   Alert,
+  View,
 } = require("react-native");
 
 export default function FormularioTarea({
@@ -68,17 +69,17 @@ export default function FormularioTarea({
   };
 
   return (
-    <SafeAreaView style={styles.contenedor}>
+    <View style={styles.contenedor}>
       <ScrollView>
         <Text style={styles.titulo}>
           {tarea.id !== "" ? "Editar" : "Nueva"}{" "}
           <Text style={styles.tituloColor}>tarea</Text>
         </Text>
 
-        <BotonCerrarModal
+        {/* <BotonCerrarModal
           setModalVisible={setModalTareaVisible}
           limpiarFormulario={limpiarFormulario}
-        />
+        /> */}
 
         <CampoFormulario
           inputEtiqueta="Titulo de la tarea"
@@ -113,7 +114,7 @@ export default function FormularioTarea({
           </Text>
         </Pressable>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -127,7 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontFamily: "PoppinsRegular",
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 20,
   },
   tituloColor: {
     fontWeight: "700",
