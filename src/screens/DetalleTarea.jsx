@@ -1,7 +1,6 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import BotonCerrarModal from "./BotonCerrarModal";
+import BotonCerrarModal from "../components/BotonCerrarModal";
 import { formatearFecha } from "../helpers";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { useTareas } from "../hooks/useTareas";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
@@ -59,6 +58,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0810F",
   },
   titulo: {
+    marginTop: 20,
     color: "#fff",
     fontSize: 30,
     fontFamily: "PoppinsRegular",

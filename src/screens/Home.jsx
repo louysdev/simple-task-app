@@ -2,26 +2,36 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
-  Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
 } from "react-native";
-import FormularioTarea from "../components/FormularioTarea";
 import CartaTarea from "../components/CartaTarea";
-import DetalleTarea from "../components/DetalleTarea";
 import { useFonts } from "expo-font";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useTareas } from "../hooks/useTareas";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SplashScreen from "expo-splash-screen";
+import * as Notifications from "expo-notifications";
+import { isDevice } from "expo-device";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
 
 function Home() {
   const [fontsLoaded, fontError] = useFonts({
     PoppinsRegular: require("../../assets/fonts/Poppins-Regular.ttf"),
     PoppinsBold: require("../../assets/fonts/Poppins-Bold.ttf"),
   });
+  const [expoPushToken, setExpoPushToken] = useState("");
+  const [notification, setNotification] = useState(false);
 
   const {
     handleDelete,
@@ -34,6 +44,46 @@ function Home() {
   } = useTareas();
 
   const navigation = useNavigation();
+
+  const registerForPushNotificationsAsync = async () => {
+    let token;
+    if (isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== "granted") {
+        Alert.alert("No se pudo obtener los permisos de la notificacion");
+        return;
+      }
+
+      // const projectId = Constants.expoConfig.extra.eas.projectId;
+
+      token = (
+        await Notifications.getExpoPushTokenAsync({
+          projectId: "715c2365-9bd2-4851-bb5d-156465193bca",
+        })
+      ).data;
+    } else {
+      return;
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
+    return token;
+  };
 
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded || fontError) {
@@ -52,6 +102,19 @@ function Home() {
     };
 
     obtenerTareas();
+
+    registerForPushNotificationsAsync().then((token) =>
+      setExpoPushToken(token)
+    );
+
+    Notifications.addNotificationReceivedListener((notification) => {
+      setNotification(notification);
+    });
+    Notifications.addNotificationResponseReceivedListener((response) => {});
+
+    return () => {
+      Notifications.removeAllNotificationListeners();
+    };
   }, []);
 
   useEffect(() => {
@@ -89,24 +152,6 @@ function Home() {
         <Text style={styles.botonTexto}>Nueva tarea</Text>
       </Pressable>
 
-      {/* Modal para crear nueva tarea
-      <Modal animationType="slide" visible={modalTareaVisible}>
-        <FormularioTarea
-          tarea={tarea}
-          setTarea={setTarea}
-          setModalTareaVisible={setModalTareaVisible}
-          tareas={tareas}
-          setTareas={setTareas}
-        />
-      </Modal>
-
-      <Modal animationType="slide" visible={modalDetalleVisible}>
-        <DetalleTarea
-          tarea={tarea}
-          setModalDetalleVisible={setModalDetalleVisible}
-        />
-      </Modal> */}
-
       {tareas.length <= 0 ? (
         <Text style={styles.textoNoTareas}>No hay tareas</Text>
       ) : (
@@ -135,6 +180,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titulo: {
+    marginTop: 20,
     fontSize: 30,
     fontFamily: "PoppinsRegular",
     textAlign: "center",

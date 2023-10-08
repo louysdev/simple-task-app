@@ -1,10 +1,9 @@
 import Home from "./src/screens/Home";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import FormularioTarea from "./src/components/FormularioTarea";
+import FormularioTarea from "./src/screens/FormularioTarea";
 import { TareasProvider } from "./src/context/TareasContext";
-import BotonCerrarModal from "./src/components/BotonCerrarModal";
-import DetalleTarea from "./src/components/DetalleTarea";
+import DetalleTarea from "./src/screens/DetalleTarea";
 
 const Stack = createNativeStackNavigator();
 

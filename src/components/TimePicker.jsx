@@ -2,27 +2,35 @@ import RNDateTimePicker from "@react-native-community/datetimepicker";
 import { useState } from "react";
 import { Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import { formatearFechaSolo, formatearHoraSolo } from "../helpers";
+import { getCalendars } from "expo-localization";
 
 export default function TimePicker({ fechaTarea, handleDate = () => {} }) {
-  const [date, setDate] = useState(fechaTarea);
+  // Obtener zona horario
+  const { timeZone } = getCalendars()[0];
+
+  const [date, setDate] = useState(new Date(fechaTarea));
   const [mode, setMode] = useState("time");
   const [show, setShow] = useState(false);
 
-  const [fecha, setFecha] = useState(formatearFechaSolo(date));
-  const [hora, setHora] = useState(formatearHoraSolo(date));
+  const [fecha, setFecha] = useState(formatearFechaSolo(date, timeZone));
+  const [hora, setHora] = useState(formatearHoraSolo(date, timeZone));
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShow(Platform.OS === "ios");
     setDate(currentDate);
 
-    let tempDate = new Date(currentDate);
+    // Obtén la zona horaria local del dispositivo
+    const localTimeZone = timeZone || "GMT"; // Si timeZone es undefined, usa GMT como zona horaria por defecto
 
-    setFecha(formatearFechaSolo(tempDate));
+    // Convierte la fecha y hora seleccionadas a UTC
+    const currentDateUTC = new Date(currentDate).toISOString();
 
-    setHora(formatearHoraSolo(tempDate));
+    setFecha(formatearFechaSolo(currentDateUTC, localTimeZone));
+    setHora(formatearHoraSolo(currentDateUTC, localTimeZone));
 
-    handleDate(currentDate);
+    // Guarda currentDateUTC en tu base de datos o en donde sea necesario.
+    handleDate(currentDateUTC);
   };
 
   const showMode = (currentMode) => {
@@ -64,14 +72,11 @@ export default function TimePicker({ fechaTarea, handleDate = () => {} }) {
 
       {show && (
         <RNDateTimePicker
-          testID="dateTimePicker"
-          timeZoneOffsetInMinutes={0}
           value={date}
           mode={mode}
           is24Hour={true}
           display="default"
           onChange={onChange}
-          locale="es-ES"
         />
       )}
     </View>

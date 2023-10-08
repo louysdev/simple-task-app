@@ -1,9 +1,10 @@
 import { useContext, useEffect } from "react";
-import CampoFormulario from "./CampoFormulario";
+import CampoFormulario from "../components/CampoFormulario";
 import { TareasContext } from "../context/TareasContext";
 import { useNavigation } from "@react-navigation/native";
-import BotonCerrarModal from "./BotonCerrarModal";
-import TimePicker from "./TimePicker";
+import BotonCerrarModal from "../components/BotonCerrarModal";
+import TimePicker from "../components/TimePicker";
+import * as Notifications from "expo-notifications";
 
 const {
   Text,
@@ -18,17 +19,26 @@ export default function FormularioTarea() {
   const { tarea, setTarea, tareas, setTareas } = useContext(TareasContext);
   const navigation = useNavigation();
 
+  const sendNotification = async (tarea) => {
+    const trigger = new Date(tarea.fecha);
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: tarea.titulo,
+        body: tarea.descripcion,
+      },
+      trigger,
+    });
+  };
+
   const handleChange = (elemento, campo) => {
-    console.log(tarea);
     setTarea({ ...tarea, [campo]: elemento });
   };
 
   const handleDate = (date) => {
-    console.log(date);
     setTarea({ ...tarea, fecha: date });
   };
 
-  const handleSumbit = () => {
+  const handleSumbit = async () => {
     if (
       [tarea.titulo, tarea.descripcion, tarea.materia, tarea.fecha].includes("")
     ) {
@@ -57,6 +67,7 @@ export default function FormularioTarea() {
       setTareas((prevState) => [...prevState, nuevaTarea]);
     }
 
+    await sendNotification(nuevaTarea);
     limpiarFormulario();
     navigation.navigate("Home");
   };
@@ -136,6 +147,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titulo: {
+    marginTop: 20,
     color: "#fff",
     fontSize: 28,
     fontFamily: "PoppinsRegular",
