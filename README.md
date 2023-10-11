@@ -13,7 +13,7 @@ Este README te servirá para que puedas probar el proyecto donde gustes.
 
 ## Vista previa
 
-![Preview de App](./src/assets/preview.png)
+![Preview de App](./assets/preview.png)
 
 ## Requisitos
 
